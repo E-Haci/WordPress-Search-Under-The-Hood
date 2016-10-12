@@ -1,7 +1,7 @@
 <?php
 /* 
 Plugin name: Code Search by Elvin 
-Version: 0.1.0
+Version: 0.1.1
 Author: Elvin Haci
 Author URI: http://elwpin.com/
 */
@@ -18,12 +18,15 @@ function register_code_search()
 
 function eh_code_search_init()
 {
-    echo '<h1>Enter any input as a get variable</h1><form action="" method="get">
+    echo '<h1>Enter any input as a get variable</h1><form action="" method="get">';
+    wp_nonce_field('my_hoodsearch_nonce', 'my_hoodsearch_nonce');
+    echo '
 	<input type="text" name="string">
 <input type="hidden" value="code_search" name="page">
 <select name="wheretosearch"><option value="current_theme">Current theme</option><option value="all_themes">All themes</option><option value="plugins">All plugins</option></select>
 <input type="submit" value="Find"></form>';
-    if (isset($_GET["string"])) {
+    
+    if (!empty($_GET["string"]) and wp_verify_nonce($_GET['my_hoodsearch_nonce'], 'my_hoodsearch_nonce')) {
         echo '<h2>Started to search for <i>"' . esc_html($_GET["string"]) . '"</i>...</h2>';
         echo eh_code_search($_GET["string"]);
         echo 'Finished';
@@ -34,7 +37,6 @@ function eh_code_search_init()
 
 function eh_code_search($string, $path = '')
 {
-    //$string = 'something';
     $res = '';
     
     if ($path == '') {
@@ -51,7 +53,6 @@ function eh_code_search($string, $path = '')
     
     
     foreach ($dir as $file) {
-        //	$res.= 'Name: '.$file.'<br>';
         if (is_dir($file) and strpos($file, '.') === false) {
             eh_code_search($string, $file);
         } else {
