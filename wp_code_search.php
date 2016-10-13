@@ -1,17 +1,17 @@
 <?php
 /* 
 Plugin name: Code Search by Elvin 
-Version: 0.1.3
+Version: 0.1.4
 Author: Elvin Haci
 Author URI: http://elwpin.com/
 */
 
 
-add_action('admin_menu', 'register_code_search');
+add_action('admin_menu', 'eh_register_code_search');
 
 
 
-function register_code_search()
+function eh_register_code_search()
 {
     add_submenu_page('options-general.php', 'Code Search', 'Code Search', 'manage_options', __FILE__, 'eh_code_search_init');
 }
@@ -36,19 +36,22 @@ function eh_code_search_init()
     
 }
 
-function eh_code_search($string, $path = '')
+
+function eh_get_search_path()
 {
-    $res = '';
-    
-    if ($path == '') {
-        if (isset($_GET["wheretosearch"]) and $_GET["wheretosearch"] == 'current_theme')
-            $path = get_template_directory();
-        elseif (isset($_GET["wheretosearch"]) and $_GET["wheretosearch"] == 'all_themes')
-            $path = get_theme_root();
-        else
-            $path = untrailingslashit(plugin_dir_path(__FILE__));
-    }
-    
+    if (isset($_GET["wheretosearch"]) and $_GET["wheretosearch"] == 'current_theme')
+        $path = get_template_directory();
+    elseif (isset($_GET["wheretosearch"]) and $_GET["wheretosearch"] == 'all_themes')
+        $path = get_theme_root();
+    else
+        $path = untrailingslashit(plugin_dir_path(__FILE__));
+    return $path;
+}
+
+function eh_code_search($string, $init_path = '')
+{
+    $res  = '';
+    $path = ($init_path == '' ? eh_get_search_path() : $init_path);
     $dir = new RecursiveDirectoryIterator($path);
     
     if (!empty($_GET["extension"]))
