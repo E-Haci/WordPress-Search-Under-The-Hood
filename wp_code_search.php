@@ -1,7 +1,7 @@
 <?php
 /* 
 Plugin name: Code Search by Elvin 
-Version: 0.1.2
+Version: 0.1.3
 Author: Elvin Haci
 Author URI: http://elwpin.com/
 */
@@ -24,7 +24,7 @@ function eh_code_search_init()
 	<input type="text" name="string" placeholder="search key">
 <input type="hidden" value="code_search" name="page">
 <select name="wheretosearch"><option value="current_theme">Current theme</option><option value="all_themes">All themes</option><option value="plugins">All plugins</option></select>
-<input type="text" name="extension" placeholder="extension f.e.  .php or .js">
+<input type="text" name="extension" placeholder="extension f.e.  .php, .js, .css">
 <input type="submit" value="Find"></form>';
     
     if (!empty($_GET["string"]) and wp_verify_nonce($_GET['my_hoodsearch_nonce'], 'my_hoodsearch_nonce')) {
@@ -51,16 +51,17 @@ function eh_code_search($string, $path = '')
     
     $dir = new RecursiveDirectoryIterator($path);
     
-    if (!empty($_GET["extension"])) $ext=$_GET["extension"]; else $ext='';
+    if (!empty($_GET["extension"]))
+        $ext = $_GET["extension"];
+    else
+        $ext = '';
     
     foreach ($dir as $file) {
         if (is_dir($file) and strpos($file, '.') === false) {
             eh_code_search($string, $file);
-        } else {
+        } elseif ($ext == '' or strpos(mb_strtolower($file->getPathname()), mb_strtolower($ext)) !== false) {
             $content = file_get_contents($file->getPathname());
-            if (strpos(mb_strtolower($content), mb_strtolower($string)) !== false 
-            	and strpos(mb_strtolower($file->getPathname()), mb_strtolower($ext)) !== false
-            	) {
+            if (strpos(mb_strtolower($content), mb_strtolower($string)) !== false) {
                 $res .= '<b>Found result:</b> ' . $file->getPathname() . '<br>';
             }
         }
